@@ -8,3 +8,5 @@ This is a set of utilities for ranking the fitness of source strings based on ng
 * PLE
 
 These substrings can be compared to how frequently they appear in the English language, and a score can be assigned.  This library includes tools to generate such frequency lists from provided strings, as well as a scorer to rank strings based on those frequencies.  It also includes examples of using the scorer to attack substitution ciphers.
+
+For more discussion of the basic technique and precomputed nGram files, see http://practicalcryptography.com/cryptanalysis/text-characterisation/quadgrams/ (not written by me)
