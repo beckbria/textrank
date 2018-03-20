@@ -63,7 +63,7 @@ public class TextScorer {
          * Calculates the score for a text string by accumulating scores for each substring
          * @param ngrams Mapping of substring to score
          */
-        public ScoreCalculator(HashMap<String, Double> ngrams) {
+        public ScoreCalculator(Map<String, Double> ngrams) {
             ngramScores = ngrams;
         }
 
@@ -81,7 +81,7 @@ public class TextScorer {
 
         public double getScore() { return score; }
         private double score = 0.0;
-        private HashMap<String, Double> ngramScores;
+        private Map<String, Double> ngramScores;
     }
 
     /**

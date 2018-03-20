@@ -71,16 +71,39 @@ public class SolverTests {
         }
     }
 
+    private static double similarity(String s1, String s2) {
+        // If we wanted to get particularly fancy we could calculate edit distance here, but for test validation a
+        // simple ratio of correct characters is sufficient
+        int totalCharacters = Math.min(s1.length(), s2.length());
+        if (totalCharacters == 0) {
+            return (s1.length() == s2.length()) ? 1.0 : 0.0;
+        }
+
+        int matchedCharacters = 0;
+        for (int i = 0; i < totalCharacters; ++i) {
+            if (s1.charAt(i) == s2.charAt(i)) {
+                ++matchedCharacters;
+            }
+        }
+        return (double)matchedCharacters / (double)totalCharacters;
+    }
+
     public static void substitutionCipherTests(TextScorer scorer) {
         SubstitutionCipherSolver solver = new SubstitutionCipherSolver(scorer);
         String plainText = TextScoreUtilities.filterContent("This is a test of the substitution cipher solver function.  Longer samples of source material will enable more accurate decoding.");
         KeyedSubstitution ks = KeyedSubstitution.random();
         String cipherText = ks.applySubstitution(plainText);
+        long startTime = System.nanoTime();
         String answer = solver.Solve(cipherText);
+        long endTime = System.nanoTime();
+
         System.out.println(answer);
-        assert(answer.equals(plainText));
-        // We don't explicitly throw an AssertionError here - due to the random nature of the solver, it's entirely
+        System.out.println((double)(endTime - startTime) / 1000000.0);
+
+        // We don't check for an exact match here - due to the random nature of the solver, it's entirely
         // possible that it will miss a character or two.
-        // TODO: A proper test would write a text similarity function and measure it against a threshold
+        if (similarity(plainText, answer) < 0.95) {
+            throw new AssertionError();
+        }
     }
 }

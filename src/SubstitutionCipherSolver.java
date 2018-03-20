@@ -1,3 +1,5 @@
+import java.util.concurrent.*;
+
 public class SubstitutionCipherSolver {
     /**
      * Solves substitution ciphers.  This finds a locally optimized solution, but because it relies on random start
@@ -36,19 +38,49 @@ public class SubstitutionCipherSolver {
         bestCandidate.text = cipherText;
         bestCandidate.score = scorer.score(cipherText);
 
-        int iterationsSinceImprovement = 0;
-        while (iterationsSinceImprovement < randomImprovementThreshold) {
-            ++iterationsSinceImprovement;
+        final int threadPoolSize = Runtime.getRuntime().availableProcessors() + 1;
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadPoolSize);
+        CompletionService<PlainText> completionService = new ExecutorCompletionService<PlainText>(executor);
 
-            // TODO: Start multiple random searches on their own threads
-            PlainText answer = FindAnswer(cipherText, scorer, keyImprovementThreshold);
-
-            // TODO: Keep a list of the top n answers instead of just the top 1
-            if (answer.score > bestCandidate.score) {
-                bestCandidate = answer;
-                iterationsSinceImprovement = 0;
-            }
+        // We continue until we haven't seen an improvement in a while.  We don't have a fixed number of tasks to wait
+        // for, so fill the threadpool, then queue new tasks as we get results back until we're finished
+        for (int i = 0; i < threadPoolSize; ++i) {
+            completionService.submit(new Callable<PlainText>() {
+                @Override public PlainText call() throws Exception {
+                    return FindAnswer(cipherText, scorer, keyImprovementThreshold);
+                }
+            });
         }
+
+        int iterationsSinceImprovement = 0;
+        try {
+            while (iterationsSinceImprovement < randomImprovementThreshold) {
+                ++iterationsSinceImprovement;
+
+                Future<PlainText> f = completionService.take();
+                PlainText answer = f.get();
+
+                // TODO: Keep a list of the top n answers instead of just the top 1
+                if (answer.score > bestCandidate.score) {
+                    bestCandidate = answer;
+                    iterationsSinceImprovement = 0;
+                }
+
+                // Queue a new random task to replace this one
+                completionService.submit(new Callable<PlainText>() {
+                    @Override public PlainText call() throws Exception {
+                        return FindAnswer(cipherText, scorer, keyImprovementThreshold);
+                    }
+                });
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            System.err.println(e.toString());
+        }
+
+        // We don't need any more results
+        executor.shutdownNow();
 
         return bestCandidate.text;
     }
