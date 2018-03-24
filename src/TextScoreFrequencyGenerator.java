@@ -52,5 +52,5 @@ public class TextScoreFrequencyGenerator {
 
     /** The length of substrings stored.  Longer lengths give higher accuracy but require more memory */
     private final int nGramLength;
-    private HashMap<String, Long> frequencyCount = new HashMap();
+    private HashMap<String, Long> frequencyCount = new HashMap<String, Long>();
 }
