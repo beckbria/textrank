@@ -2,7 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TextScorer {
     /**
@@ -100,6 +100,6 @@ public class TextScorer {
     /** The length of substrings stored.  Longer lengths give higher accuracy but require more memory */
     private final int nGramLength;
     private double baselineFloor;
-    private HashMap<String, Double> nGramScores = new HashMap<>();
+    private Map<String, Double> nGramScores = new ConcurrentHashMap<>();
     private long totalCount = 0;
 }

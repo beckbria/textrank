@@ -93,13 +93,7 @@ public class SolverTests {
         String plainText = TextScoreUtilities.filterContent("This is a test of the substitution cipher solver function.  Longer samples of source material will enable more accurate decoding.");
         KeyedSubstitution ks = KeyedSubstitution.random();
         String cipherText = ks.applySubstitution(plainText);
-        long startTime = System.nanoTime();
         String answer = solver.Solve(cipherText);
-        long endTime = System.nanoTime();
-
-        System.out.println(answer);
-        System.out.println((double)(endTime - startTime) / 1000000.0);
-
         // We don't check for an exact match here - due to the random nature of the solver, it's entirely
         // possible that it will miss a character or two.
         if (similarity(plainText, answer) < 0.95) {
